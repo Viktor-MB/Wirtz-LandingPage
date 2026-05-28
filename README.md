@@ -80,35 +80,47 @@ VITE_API_KEY=sua-chave-aqui
 
 ---
 
-## 🚀 Deploy no GitHub Pages
+## 🚀 Deploy no GitHub Pages (branch main → /docs)
 
-O deploy é automático via GitHub Actions (`.github/workflows/deploy.yml`):
-a cada `push` na branch **main**, ele roda `npm ci && npm run build` e publica a
-pasta `dist/`.
+A publicação é feita a partir da branch **main**, servindo a pasta **`docs/`**
+(que contém o site já buildado pelo Vite — `build.outDir: 'docs'`).
 
-### 1. Configurar o Pages
+### Configurar o Pages (uma única vez)
 
-1. Suba este projeto para um repositório no GitHub chamado **`Wirtz-LandingPage`**
-   (o `base` em `vite.config.js` já está configurado como `/Wirtz-LandingPage/`).
-   - Se o repositório tiver **outro nome**, ajuste `base: '/OUTRO-NOME/'` no
-     `vite.config.js`.
-2. No GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. Faça um push na `main`. O workflow publica e o site fica em:
-   `https://SEU-USUARIO.github.io/Wirtz-LandingPage/`
+1. Suba o projeto para o repositório **`Wirtz-LandingPage`** no GitHub
+   (o `base` em `vite.config.js` já está como `/Wirtz-LandingPage/`).
+   - Se o repositório tiver **outro nome**, ajuste `base: '/OUTRO-NOME/'`.
+2. No GitHub: **Settings → Pages → Build and deployment**:
+   - **Source:** `Deploy from a branch`
+   - **Branch:** `main` · pasta **`/docs`** → **Save**
+3. Aguarde o deploy. O site fica em:
+   `https://Viktor-MB.github.io/Wirtz-LandingPage/`
 
-### 2. Cadastrar a chave da API em produção (Secrets)
+### Publicar uma atualização
 
-Para que o build de produção use sua API real:
+Sempre que mudar o site, rebuilde e commite a pasta `docs/`:
 
-1. No repositório: **Settings → Secrets and variables → Actions**.
-2. Aba **Secrets** → **New repository secret**. Crie os dois:
-   - `VITE_API_BASE` → a URL base da API
-   - `VITE_API_KEY` → a chave/token
-3. O workflow já injeta esses Secrets no passo de build (`env:`), então o próximo
-   push na `main` usará os valores reais.
+```bash
+npm run build
+git add -A
+git commit -m "Atualiza site"
+git push
+```
 
-> Se você não cadastrar os Secrets, o site publicado simplesmente usa os dados
-> mockados — continua funcionando.
+> O GitHub Pages republica sozinho a cada push que altere o `docs/`.
+
+### Chave da API em produção
+
+Como o build é feito **localmente**, os valores do seu **`.env`** são embutidos no
+site no momento do `npm run build`. Para publicar com a API real:
+
+1. Preencha `VITE_API_BASE` e `VITE_API_KEY` no `.env`.
+2. Rode `npm run build` e commite o `docs/` atualizado.
+
+> ⚠️ Variáveis `VITE_*` ficam **visíveis no JavaScript publicado** (é assim que o
+> Vite funciona no front-end). Para um protótipo tudo bem; para produção real,
+> prefira uma chave restrita/somente-leitura ou um proxy de backend.
+> Se o `.env` estiver vazio, o site publicado usa os dados mockados.
 
 ---
 
@@ -116,11 +128,12 @@ Para que o build de produção use sua API real:
 
 ```
 .
-├─ index.html               # entrada do Vite
-├─ vite.config.js           # base: '/Wirtz-LandingPage/'
+├─ index.html               # entrada do Vite (dev)
+├─ vite.config.js           # base: '/Wirtz-LandingPage/', build.outDir: 'docs'
 ├─ .env.example             # modelo de variáveis (versionado)
-├─ .github/workflows/       # deploy.yml (GitHub Pages)
-├─ public/assets/           # logo + fotos (.webp)
+├─ docs/                    # site buildado, publicado pelo GitHub Pages
+├─ public/                  # assets estáticos + .nojekyll
+│  └─ assets/               # logo + fotos (.webp)
 └─ src/
    ├─ main.jsx              # entrada React (HashRouter)
    ├─ App.jsx               # rotas, scroll reveal, título por rota

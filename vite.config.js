@@ -7,4 +7,10 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   base: '/Wirtz-LandingPage/',
   plugins: [react()],
+  build: {
+    // Publicação via GitHub Pages "Deploy from a branch" (main → /docs):
+    // o site buildado é gerado em docs/ e commitado no repositório.
+    outDir: 'docs',
+    emptyOutDir: true,
+  },
 });
