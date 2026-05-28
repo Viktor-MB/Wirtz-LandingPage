@@ -9,10 +9,16 @@
  * (dados sensíveis) — apenas dados públicos: serviços, médicos, setores.
  */
 
-const API_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
+const RAW_BASE = (import.meta.env.VITE_API_BASE || '').replace(/\/$/, '');
 const API_KEY = import.meta.env.VITE_API_KEY || '';
 
-export const hasApiConfig = Boolean(API_BASE && API_KEY);
+// Em DEV chamamos o proxy do Vite (/api) para contornar o CORS da API; em
+// produção (site estático) usaríamos a URL direta — que a API hoje bloqueia
+// por CORS, então o site publicado cai no mock (ver README / proxy serverless).
+const API_BASE = import.meta.env.DEV ? '/api' : RAW_BASE;
+
+// Só ativa o consumo real se houver URL + chave configuradas no .env.
+export const hasApiConfig = Boolean(RAW_BASE && API_KEY);
 
 // Dados mockados — usados quando o .env está vazio ou a API falha, para o
 // site NUNCA quebrar.
