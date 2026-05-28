@@ -3,10 +3,9 @@
 import { Link } from 'react-router-dom';
 import { Icon } from './Icons.jsx';
 import { ATEND_URL, PAGES, asset } from '../constants.js';
-import { useProviders } from '../hooks/useProviders.js';
 
-// Fallback curado (com fotos) — usado se a API estiver indisponível/vazia.
-const FALLBACK_TEAM = [
+// Equipe curada (com fotos) — mantida fixa, como no design original.
+const TEAM = [
   { name: "Dra. Mariana Crispim", role: "Ultrassonografia · Angiologia · Medicina da Dor", id: "team-1", photo: "assets/dra-mariana.webp" },
   { name: "Kátia Alvim Mendonça", role: "Ginecologia", id: "team-2", photo: "assets/dra-katia.webp" },
   { name: "Dra. Viviane Costanza", role: "Ultrassonografia", id: "team-3", photo: "assets/dra-viviane.webp" },
@@ -15,19 +14,7 @@ const FALLBACK_TEAM = [
   { name: "Dra. Patricia Feliz", role: "Dermatologia", id: "team-6", photo: "assets/dra-patricia.webp" },
 ];
 
-// Iniciais (até 2) para o avatar quando não há foto.
-function initials(name) {
-  return String(name).split(/\s+/).filter(Boolean).slice(0, 2)
-    .map((w) => w[0]).join('').toUpperCase();
-}
-
 export function Team() {
-  const { providers } = useProviders();
-  // Médicos reais da API (sem foto → avatar de iniciais); fallback ao curado.
-  const team = (providers && providers.length)
-    ? providers.map((p) => ({ id: p.id, name: p.name, role: p.specialty || 'Médico(a)', photo: p.photo }))
-    : FALLBACK_TEAM;
-
   return (
     <section className="team section-pad" id="equipe">
       <div className="container">
@@ -37,15 +24,10 @@ export function Team() {
           <p>Profissionais com mais de duas décadas de experiência, formados nas maiores universidades do país, prontos para te receber na Ilha do Governador.</p>
         </div>
         <div className="team-grid reveal-stagger">
-          {team.map((m) => (
+          {TEAM.map((m) => (
             <article key={m.id} className="team-card">
-              <div
-                className="team-photo"
-                style={!m.photo ? { display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--g-brand)' } : undefined}
-              >
-                {m.photo
-                  ? <img src={m.photo.startsWith('http') ? m.photo : asset(m.photo)} alt={m.name} loading="lazy" />
-                  : <span style={{ fontFamily: 'var(--f-serif)', fontSize: 'clamp(2rem,5vw,2.8rem)', fontWeight: 500, color: '#fff', letterSpacing: '.02em' }}>{initials(m.name)}</span>}
+              <div className="team-photo">
+                <img src={asset(m.photo)} alt={m.name} loading="lazy" />
               </div>
               <div className="team-info">
                 <h4>{m.name}</h4>
