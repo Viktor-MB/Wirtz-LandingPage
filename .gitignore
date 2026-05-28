@@ -1,0 +1,20 @@
+# dependências
+node_modules
+
+# build
+dist
+
+# variáveis de ambiente (NUNCA versionar a chave da API)
+.env
+.env.local
+.env.*.local
+
+# backup do protótipo antigo (não vai para o GitHub)
+legacy
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode
+*.log
