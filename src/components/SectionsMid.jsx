@@ -2,17 +2,26 @@
 
 import { useState, useEffect } from 'react';
 import { Icon } from './Icons.jsx';
-import { ATEND_URL } from '../constants.js';
+import { ATEND_URL, formatBRL } from '../constants.js';
+import { distinctSpecialties } from '../lib/api.js';
+import { useProviders } from '../hooks/useProviders.js';
+import { useServices } from '../hooks/useServices.js';
+
+// Fallback curado (usado se a API estiver indisponível ou vier vazia).
+const FALLBACK_SPECS = [
+  "Ginecologia", "Obstetrícia", "Ultrassonografia", "Pediatria",
+  "Cardiologia", "Psicologia", "Fonoaudiologia", "Neurologia",
+  "Otorrinolaringologia", "Mastologia", "Endocrinologia", "Nutrição",
+  "Nutrição Pediátrica", "Odontologia", "Odontopediatria", "Homeopatia",
+  "Angiologia", "Urologia", "Psiquiatria", "Ortopedia",
+  "Gastroenterologia", "Dermatologia",
+];
 
 export function Specialties() {
-  const specs = [
-    "Ginecologia", "Obstetrícia", "Ultrassonografia", "Pediatria",
-    "Cardiologia", "Psicologia", "Fonoaudiologia", "Neurologia",
-    "Otorrinolaringologia", "Mastologia", "Endocrinologia", "Nutrição",
-    "Nutrição Pediátrica", "Odontologia", "Odontopediatria", "Homeopatia",
-    "Angiologia", "Urologia", "Psiquiatria", "Ortopedia",
-    "Gastroenterologia", "Dermatologia",
-  ];
+  // Especialidades reais = especialidades distintas dos médicos da API.
+  const { providers } = useProviders();
+  const real = distinctSpecialties(providers || []);
+  const specs = real.length ? real : FALLBACK_SPECS;
   // Split into two columns
   const half = Math.ceil(specs.length / 2);
   const cols = [specs.slice(0, half), specs.slice(half)];
@@ -52,28 +61,33 @@ export function Specialties() {
   );
 }
 
+// Fallback curado (só nomes; sem preço).
+const FALLBACK_EXAMS = [
+  "Ultrassonografia Transvaginal",
+  "Ultrassonografia Obstétrica",
+  "Morfológica",
+  "Doppler colorido",
+  "Ecocardiograma fetal",
+  "Ultrassom da tireoide",
+  "Ultrassom das mamas",
+  "Abdômen total",
+  "MAPA / Eletro / Holter",
+  "Audiometria",
+  "Histeroscopia",
+  "Colposcopia",
+].map((name) => ({ id: name, name, price: null }));
+
 export function Exams() {
-  const exams = [
-    "Ultrassonografia Transvaginal",
-    "Ultrassonografia Obstétrica",
-    "Morfológica",
-    "Doppler colorido",
-    "Ecocardiograma fetal",
-    "Ultrassom da tireoide",
-    "Ultrassom das mamas",
-    "Abdômen total",
-    "MAPA / Eletro / Holter",
-    "Audiometria",
-    "Histeroscopia",
-    "Colposcopia",
-  ];
+  // Serviços reais da API (nome + preço "a partir de"); fallback ao curado.
+  const { services } = useServices();
+  const exams = (services && services.length) ? services : FALLBACK_EXAMS;
   const half = Math.ceil(exams.length / 2);
   const cols = [exams.slice(0, half), exams.slice(half)];
   return (
     <section className="exams section-pad">
       <div className="container">
         <div className="exams-head reveal">
-          <span className="eyebrow">Exames mais procurados</span>
+          <span className="eyebrow">Serviços e exames</span>
           <h2>Resultados em tempo hábil,<br/>com a precisão que você merece.</h2>
         </div>
         <div className="exams-index reveal">
@@ -81,11 +95,22 @@ export function Exams() {
             <ul key={ci} className="exams-col">
               {col.map((e, i) => {
                 const num = ci === 0 ? i + 1 : i + 1 + half;
+                const priceLabel = formatBRL(e.price);
                 return (
-                  <li key={e}>
+                  <li key={e.id}>
                     <a className="exam-row" href={ATEND_URL} target="_blank" rel="noopener">
                       <span className="exam-num">{String(num).padStart(2, '0')}</span>
-                      <span className="exam-name">{e}</span>
+                      <span className="exam-name">
+                        {e.name}
+                        {priceLabel && (
+                          <em style={{
+                            display: 'block', fontStyle: 'normal', fontSize: 13,
+                            color: 'var(--c-pink)', fontWeight: 600, marginTop: 2,
+                          }}>
+                            a partir de {priceLabel}
+                          </em>
+                        )}
+                      </span>
                       <Icon.ArrowRight className="exam-arrow" style={{width: 16, height: 16}} />
                     </a>
                   </li>

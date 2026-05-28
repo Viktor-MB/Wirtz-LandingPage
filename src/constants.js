@@ -17,3 +17,7 @@ export const PAGES = [
 // do Vite — necessário para as imagens funcionarem sob o subcaminho do
 // GitHub Pages (ex.: /Wirtz-LandingPage/assets/logo.webp).
 export const asset = (p) => import.meta.env.BASE_URL + p.replace(/^\//, '');
+
+// Formata um número como moeda brasileira (R$). Retorna '' para valores nulos.
+const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+export const formatBRL = (v) => (v == null || Number.isNaN(Number(v)) ? '' : BRL.format(Number(v)));
